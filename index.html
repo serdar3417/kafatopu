@@ -128,6 +128,31 @@
             z-index: 5;
         }
 
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 40px;
+            background: linear-gradient(45deg, #FF5722, #D84315);
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            font-size: 10px;
+            cursor: pointer;
+            pointer-events: all;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .home-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 87, 34, 0.6);
+        }
+
         .control-btn {
             position: absolute;
             width: 80px;
@@ -237,6 +262,14 @@
                 font-size: 1.5rem;
             }
 
+            .home-btn {
+                width: 50px;
+                height: 35px;
+                font-size: 8px;
+                top: 10px;
+                right: 10px;
+            }
+
             .p1-left { left: 10px; }
             .p1-right { left: 80px; }
             .p1-jump { left: 10px; }
@@ -342,6 +375,8 @@
         <canvas id="gameCanvas" width="800" height="450"></canvas>
         
         <div class="game-controls" id="game-controls" style="display: none;">
+            <button class="home-btn" id="game-home-btn">🏠 ANA SAYFA</button>
+            
             <div class="control-btn p1-left" id="p1-left">‹</div>
             <div class="control-btn p1-right" id="p1-right">›</div>
             <div class="control-btn p1-jump" id="p1-jump">↑</div>
@@ -373,6 +408,8 @@
         </div>
 
         <div id="settings-screen" class="overlay">
+            <button class="home-btn" id="settings-home-btn" style="position: absolute; top: 20px; right: 20px;">🏠</button>
+            
             <div class="settings-container">
                 <h1>AYARLAR</h1>
                 
@@ -1344,6 +1381,17 @@
             });
 
             document.getElementById('back-to-menu-btn').addEventListener('click', () => {
+                showMainMenu();
+            });
+
+            // Ana sayfa butonları
+            document.getElementById('game-home-btn').addEventListener('click', () => {
+                if (confirm('Oyunu bırakıp ana sayfaya dönmek istiyor musunuz?')) {
+                    showMainMenu();
+                }
+            });
+
+            document.getElementById('settings-home-btn').addEventListener('click', () => {
                 showMainMenu();
             });
 
