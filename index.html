@@ -1,35 +1,42 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Kafa Topu Arena</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    
+    <title>Kafa Topu Arena Pro</title>
     <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
-            background-color: #111;
+            background: linear-gradient(135deg, #0c4a6e, #1e40af, #7c3aed);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: 'Press Start 2P', cursive;
-            -webkit-user-select: none; -ms-user-select: none; user-select: none;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            padding: 10px;
         }
 
         #game-container {
             position: relative;
             border: 5px solid #fff;
-            box-shadow: 0 0 30px #0ff;
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            max-width: 100vw;
+            max-height: 100vh;
         }
 
         canvas {
             display: block;
-            background-color: #87CEEB; /* Gökyüzü */
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 100%);
         }
 
         .overlay {
@@ -38,501 +45,1531 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.85);
             color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
+            z-index: 10;
         }
 
         .overlay h1 {
-            font-size: 50px;
+            font-size: clamp(24px, 6vw, 50px);
             color: #FFD700;
-            text-shadow: 3px 3px #ff0000;
+            text-shadow: 3px 3px 0px #ff0000, 6px 6px 10px rgba(0,0,0,0.5);
             margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
         .overlay p {
-            font-size: 20px;
-            margin-bottom: 30px;
+            font-size: clamp(10px, 2.5vw, 16px);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
         }
 
         .overlay button {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 24px;
-            padding: 15px 30px;
-            background: #4CAF50;
+            font-size: clamp(12px, 3vw, 18px);
+            padding: 15px 25px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
             color: white;
             border: 3px solid white;
             border-radius: 10px;
             cursor: pointer;
             text-transform: uppercase;
-            transition: transform 0.2s;
+            transition: all 0.3s;
+            min-width: 200px;
         }
 
         .overlay button:hover {
             transform: scale(1.1);
-            background: #45a049;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
         }
 
-        #end-screen {
+        .mode-btn {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+        }
+
+        .mode-btn:hover {
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.6);
+        }
+
+        .settings-btn {
+            background: linear-gradient(45deg, #FF9800, #F57C00) !important;
+        }
+
+        .settings-btn:hover {
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.6) !important;
+        }
+
+        #end-screen, #settings-screen {
             display: none;
         }
-        
-        /* Mobil Kontroller */
-        #mobile-controls {
-            display: none; 
+
+        .game-controls {
             position: absolute;
-            bottom: 20px;
+            top: 0;
             width: 100%;
-            padding: 0 20px;
-            box-sizing: border-box;
-            z-index: 100;
-            justify-content: space-between;
-        }
-        
-        @media (hover: none) and (pointer: coarse) {
-            #mobile-controls { display: flex; }
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
         }
 
-        .mobile-btn {
-            width: 70px; height: 70px;
-            background-color: rgba(255, 255, 255, 0.3);
-            border: 2px solid white;
+        .control-btn {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 3px solid white;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2.5rem;
-            color: white;
+            font-size: 2rem;
             font-weight: bold;
+            pointer-events: all;
+            touch-action: none;
+            user-select: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
         }
-        .mobile-btn:active { background-color: rgba(255, 255, 255, 0.6); }
 
+        .control-btn:active {
+            transform: scale(0.9);
+            opacity: 0.8;
+        }
+
+        .p1-left {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 65, 54, 0.3);
+            border-color: #ff4136;
+            color: #ff4136;
+        }
+
+        .p1-right {
+            left: 120px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 65, 54, 0.3);
+            border-color: #ff4136;
+            color: #ff4136;
+        }
+
+        .p1-jump {
+            left: 20px;
+            top: 30%;
+            transform: translateY(-50%);
+            background: rgba(255, 65, 54, 0.3);
+            border-color: #ff4136;
+            color: #ff4136;
+        }
+
+        .p1-kick {
+            left: 120px;
+            top: 30%;
+            transform: translateY(-50%);
+            background: rgba(255, 65, 54, 0.3);
+            border-color: #ff4136;
+            color: #ff4136;
+        }
+
+        .p2-left {
+            right: 120px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 116, 217, 0.3);
+            border-color: #0074d9;
+            color: #0074d9;
+        }
+
+        .p2-right {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 116, 217, 0.3);
+            border-color: #0074d9;
+            color: #0074d9;
+        }
+
+        .p2-jump {
+            right: 120px;
+            top: 30%;
+            transform: translateY(-50%);
+            background: rgba(0, 116, 217, 0.3);
+            border-color: #0074d9;
+            color: #0074d9;
+        }
+
+        .p2-kick {
+            right: 20px;
+            top: 30%;
+            transform: translateY(-50%);
+            background: rgba(0, 116, 217, 0.3);
+            border-color: #0074d9;
+            color: #0074d9;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 5px; }
+            
+            #game-container {
+                border-width: 3px;
+                border-radius: 10px;
+            }
+            
+            .control-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            .p1-left { left: 10px; }
+            .p1-right { left: 80px; }
+            .p1-jump { left: 10px; }
+            .p1-kick { left: 80px; }
+            .p2-left { right: 80px; }
+            .p2-right { right: 10px; }
+            .p2-jump { right: 80px; }
+            .p2-kick { right: 10px; }
+        }
+
+        .settings-container {
+            max-width: 500px;
+            padding: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .setting-item {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .setting-item label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 10px;
+            color: #FFD700;
+        }
+
+        .setting-item input, .setting-item select {
+            width: 100%;
+            padding: 8px;
+            font-size: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid white;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 10px 15px;
+            background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.3s;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .file-label:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(156, 39, 176, 0.6);
+        }
+
+        .preview {
+            width: 100px;
+            height: 100px;
+            border: 2px solid white;
+            border-radius: 10px;
+            margin: 10px auto;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            font-size: 8px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .background-preview {
+            width: 200px;
+            height: 100px;
+        }
+
+        .clear-btn {
+            background: linear-gradient(45deg, #FF5722, #D84315) !important;
+            padding: 5px 10px !important;
+            font-size: 8px !important;
+            margin-top: 5px;
+            min-width: auto !important;
+        }
     </style>
 </head>
 <body>
-
     <div id="game-container">
         <canvas id="gameCanvas" width="800" height="450"></canvas>
         
+        <div class="game-controls" id="game-controls" style="display: none;">
+            <div class="control-btn p1-left" id="p1-left">‹</div>
+            <div class="control-btn p1-right" id="p1-right">›</div>
+            <div class="control-btn p1-jump" id="p1-jump">↑</div>
+            <div class="control-btn p1-kick" id="p1-kick">⚽</div>
+            
+            <div class="control-btn p2-left" id="p2-left">‹</div>
+            <div class="control-btn p2-right" id="p2-right">›</div>
+            <div class="control-btn p2-jump" id="p2-jump">↑</div>
+            <div class="control-btn p2-kick" id="p2-kick">⚽</div>
+        </div>
+        
         <div id="start-screen" class="overlay">
-            <h1>KAFA TOPU</h1>
-            <p>Ok tuşlarıyla hareket et ve zıpla. <br>Boşluk tuşu ile şut çek!</p>
-            <button id="start-btn">Maça Başla</button>
+            <h1>KAFA TOPU PRO</h1>
+            <p>Yeni nesil kafa topu deneyimi!</p>
+            <div class="button-container">
+                <button id="single-mode-btn" class="mode-btn">TEK OYUNCU</button>
+                <button id="two-player-mode-btn" class="mode-btn">İKİ OYUNCU</button>
+                <button id="settings-btn" class="settings-btn">AYARLAR</button>
+            </div>
         </div>
 
         <div id="end-screen" class="overlay">
             <h1 id="result-text">MAÇ BİTTİ</h1>
             <p id="final-score-text">Skor: 0 - 0</p>
-            <button id="restart-btn">Yeniden Oyna</button>
+            <div class="button-container">
+                <button id="restart-btn">YENİDEN OYNA</button>
+                <button id="main-menu-btn">ANA MENÜ</button>
+            </div>
         </div>
-        
-        <div id="mobile-controls">
-            <div id="left-btn" class="mobile-btn">‹</div>
-            <div id="right-btn" class="mobile-btn">›</div>
-            <div id="kick-btn" class="mobile-btn">⚽</div>
-            <div id="jump-btn" class="mobile-btn">↑</div>
+
+        <div id="settings-screen" class="overlay">
+            <div class="settings-container">
+                <h1>AYARLAR</h1>
+                
+                <div class="setting-item">
+                    <label>Oyun Arkaplanı:</label>
+                    <input type="file" id="bg-input" class="file-input" accept="image/*">
+                    <label for="bg-input" class="file-label">Özel Arkaplan Seç</label>
+                    <button class="clear-btn" id="clear-bg">Varsayılan</button>
+                    <div class="preview background-preview" id="bg-preview">Yükleniyor...</div>
+                </div>
+
+                <div class="setting-item">
+                    <label>Top Görseli:</label>
+                    <input type="file" id="ball-input" class="file-input" accept="image/*">
+                    <label for="ball-input" class="file-label">Özel Top Seç</label>
+                    <button class="clear-btn" id="clear-ball">Varsayılan</button>
+                    <div class="preview" id="ball-preview">Yükleniyor...</div>
+                </div>
+
+                <div class="setting-item">
+                    <label>Sol Kale Görseli:</label>
+                    <input type="file" id="goal1-input" class="file-input" accept="image/*">
+                    <label for="goal1-input" class="file-label">Özel Sol Kale Seç</label>
+                    <button class="clear-btn" id="clear-goal1">Varsayılan</button>
+                    <div class="preview" id="goal1-preview">Yükleniyor...</div>
+                </div>
+
+                <div class="setting-item">
+                    <label>Sağ Kale Görseli:</label>
+                    <input type="file" id="goal2-input" class="file-input" accept="image/*">
+                    <label for="goal2-input" class="file-label">Özel Sağ Kale Seç</label>
+                    <button class="clear-btn" id="clear-goal2">Varsayılan</button>
+                    <div class="preview" id="goal2-preview">Yükleniyor...</div>
+                </div>
+                
+                <div class="setting-item">
+                    <label>Oyuncu 1 Karakteri:</label>
+                    <input type="file" id="p1-char-input" class="file-input" accept="image/*">
+                    <label for="p1-char-input" class="file-label">Özel Karakter Seç</label>
+                    <button class="clear-btn" id="clear-p1">Varsayılan</button>
+                    <div class="preview" id="p1-preview">Yükleniyor...</div>
+                </div>
+
+                <div class="setting-item">
+                    <label>Oyuncu 2 Karakteri:</label>
+                    <input type="file" id="p2-char-input" class="file-input" accept="image/*">
+                    <label for="p2-char-input" class="file-label">Özel Karakter Seç</label>
+                    <button class="clear-btn" id="clear-p2">Varsayılan</button>
+                    <div class="preview" id="p2-preview">Yükleniyor...</div>
+                </div>
+
+                <div class="setting-item">
+                    <label>Maç Süresi:</label>
+                    <select id="match-duration">
+                        <option value="60">1 Dakika</option>
+                        <option value="90" selected>1.5 Dakika</option>
+                        <option value="120">2 Dakika</option>
+                        <option value="180">3 Dakika</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <label>Zorluk Seviyesi:</label>
+                    <select id="difficulty">
+                        <option value="easy">Kolay</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="hard">Zor</option>
+                    </select>
+                </div>
+
+                <div class="button-container">
+                    <button id="save-settings-btn">KAYDET</button>
+                    <button id="back-to-menu-btn">GERİ DÖN</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-    // --- TEMEL KURULUM ---
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const startScreen = document.getElementById('start-screen');
-    const endScreen = document.getElementById('end-screen');
-    const startBtn = document.getElementById('start-btn');
-    const restartBtn = document.getElementById('restart-btn');
-    const resultText = document.getElementById('result-text');
-    const finalScoreText = document.getElementById('final-score-text');
+        // Canvas ve context
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Canvas boyutlandırma
+        function resizeCanvas() {
+            const maxWidth = window.innerWidth - 20;
+            const maxHeight = window.innerHeight - 20;
+            const aspectRatio = 800 / 450;
+            
+            let newWidth = Math.min(800, maxWidth);
+            let newHeight = newWidth / aspectRatio;
+            
+            if (newHeight > maxHeight) {
+                newHeight = maxHeight;
+                newWidth = newHeight * aspectRatio;
+            }
+            
+            canvas.style.width = newWidth + 'px';
+            canvas.style.height = newHeight + 'px';
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
 
-    // --- SES EFEKTLERİ (Base64 formatında) ---
-    const sounds = {
-        kick: new Audio("data:audio/wav;base64,UklGRlgBAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YXIAAACw/v/+v/7//v/+v/7//v/+v/4A/gD+AP4A/gD+AP4A/gD+AP4A/v/9//3//f/9//3//f/9//3//f/9//z/+v/6//r/+v/6//r/+v/6//r/+f/5//n/+f/5//n/+f/5//n/+f/4//j/+P/4//j/+P/4//j/+P/4//f/9/33/ff99/33/ff99/33/ff98/3z/fP98/3z/fP98/3z/fP98/3z/ev96/3r/ev96/3r/ev96/3r/ev95/3n/ef95/3n/ef95/3n/ef95/3j/eP94/3j/eP94/3j/eP94/3j/eP93/3X/df91/3X/df91/3X/df91/3L/cv9y/3L/cv9y/3L/cv9y/3L/cv9x/3H/cf9x/3H/cf9x/3H/cf9x/3D/cP9w/3D/cP9w/3D/cP9w/3D/cP9v/2//b/9v/2//b/9v/2//b/9v/2//af9p/2n/af9p/2n/af9p/2n/af9o/2j/aP9o/2j/aP9o/2j/aP9o/2b/Zv9m/2b/Zv9m/2b/Zv9m/2b/Yv9i/2L/Yv9i/2L/Yv9i/2L/Yv9h/2H/Yf9h/2H/Yf9h/2H/Yf9h/2D/YP9g/2D/YP9g/2D/YP9g/2D/X/9f/1//X/9f/1//X/9f/1//X/9e/17/Xv9e/17/Xv9e/17/Xv9e/13/Xf9d/13/Xf9d/13/Xf9d/13/XP9c/1z/XP9c/1z/XP9c/1z/XP9b/1v/W/9b/1v/W/9b/1v/W/9b/1r/Wv9a/1r/Wv9a/1r/Wv9a/1r/V/9X/1f/V/9X/1f/V/9X/1f/V/9U/1T/VP9U/1T/VP9U/1T/VP9U/1P/U/9T/1P/U/9T/1P/U/9T/1P/Uv9S/1L/Uv9S/1L/Uv9S/1L/Uv9R/1H/Uf9R/1H/Uf9R/1H/Uf9R/1D/UP9Q/1D/UP9Q/1D/UP9Q/1D/T/9P/0//T/9P/0//T/9P/0//T/9O/07/Tv9O/07/Tv9O/07/Tv9O/03/Tf9N/03/Tf9N/03/Tf9N/03/S/9L/0v/S/9L/0v/S/9L/0v/S/9K/0r/Sv9K/0r/Sv9K/0r/Sv9K/0r/SP9I/0j/SP9I/0j/SP9I/0j/SP9H/0f/R/9H/0f/R/9H/0f/R/9H/0P/Q/9D/0P/Q/9D/0P/Q/9D/0P/Qv9C/0L/Qv9C/0L/Qv9C/0L/Qv9B/0H/Qf9B/0H/Qf9B/0H/Qf9B/0D/QP9A/0D/QP9A/0D/QP9A/0D/P/8//z//P/8//z//P/8//z//Pv8+/z7/Pv8+/z7/Pv8+/z7/Pv89/z3/Pf89/z3/Pf89/z3/Pf89/zz/PP88/zz/PP88/zz/PP88/zz/O/87/zv/O/87/zv/O/87/zv/O/86/zr/Ov86/zr/Ov86/zr/Ov86/zn/Of85/zn/Of85/zn/Of85/zn/OP84/zj/OP84/zj/OP84/zj/OP83/zf/N/83/zf/N/83/zf/N/83/zL/Mv8y/zL/Mv8y/zL/Mv8y/zL/Mf8x/zH/Mf8x/zH/Mf8x/zH/Mf8w/zD/MP8w/zD/MP8w/zD/MP8w/y//L/8v/y//L/8v/y//L/8v/y//K/8r/yv/K/8r/yv/K/8r/yv/K/8p/yn/Kf8p/yn/Kf8p/yn/Kf8p/yj/KP8o/yj/KP8o/yj/KP8o/yj/J/8n/yf/J/8n/yf/J/8n/yf/J/8i/yL/Iv8i/yL/Iv8i/yL/Iv8i/yH/If8h/yH/If8h/yH/If8h/yH/IP8g/yD/IP8g/yD/IP8g/yD/IP8f/x//H/8f/x//H/8f/x//H/8f/x7/Hv8e/x7/Hv8e/x7/Hv8e/x7/G/8b/xv/G/8b/xv/G/8b/xv/G/8Z/xn/Gf8Z/xn/Gf8Z/xn/Gf8Z/xX/Ff8V/xX/Ff8V/xX/Ff8V/xX/E/8T/xP/E/8T/xP/E/8T/xP/E/8R/xH/Ef8R/xH/Ef8R/xH/Ef8R/w//D/8P/w//D/8P/w//D/8P/w//C/8L/wv/C/8L/wv/C/8L/wv/C/8I/wj/CP8I/wj/CP8I/wj/CP8I/wX/Bf8F/wX/Bf8F/wX/Bf8F/wX/Av8C/wL/Av8C/wL/Av8C/wL/Av/+/v7+/v7+/v7+/v7+/v7+/v7+/v39/f39/f39/f39/f39/f39/f39/fn5+fn5+fn5+fn5+fn5+fn5+fn5+Pn4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+PT09PT09PT09PT09PT09PT09PT09PT09PTz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v39/f39/f39/f39/f39/f39/f39/f39/Q=="),
-        goal: new Audio("data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhVwAAAPX+/v79/f/6//r/+v75/vn++f35/vv9+v36/vz9+P34/ff99/32/fb99P3z/fL98f3x/vL+8f7v/u/+7/7s/uv+6v7p/un+5/7m/uX+4v7g/t/+3/7a/tn+1/7V/tT+0v7Q/s/+z/7N/s3+y/7K/sr+x/7G/sf+w/7A/sD+v/6+/r3+vP67/rr+uP63/rf+tP6z/rL+sP6v/q/+qP6k/qT+o/6f/p/+nv6c/pr+mf6X/pf+kv6R/pD+j/6P/o3+if6I/of+hP6A/oD+f/59/nz+e/56/nn+d/52/nT+cv5x/nD+bv5s/mr+af5o/mj+Zf5k/mH+Yf5g/l/+X/5b/lv+Wv5Z/ln+V/5U/lP+Uv5R/lD+T/5O/k3+S/5K/kn+SP5H/kf+Q/5B/kD+f/58/nz+e/56/nn+c/5z/nD+b/5u/mz+av5q/mn+aP5o/mT+Y/5i/mH+X/5f/lv+W/5a/ln+V/5U/lT+U/5S/lH+Uf5P/k/+Tf5N/kv+Sv5J/kj+R/5H/kP+Qv5A/n/+fP58/nv+e/56/nn+c/5z/nL+cQ=="),
-        whistle: new Audio("data:audio/wav;base64,UklGRqACAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YYACAABAgD9AP0E/QD9AP0A/vj+AP74/vj++P7s/gD+uP6s/oD+qP6Y/qT+sP6I/n/+cP5k/lT+TP5A/kL+RP5I/kj+QP4w/iL+Hv4a/hT+Cv4C/gr+Df4O/hD+DP4M/gn+CP4E/gP+/P76/vX+9v7z/vD+7v7q/uj+4f7c/tb+0P7M/sf+vv66/q/+pP6Y/oj+fv5y/m/+av5i/l/+Wf5U/kD+Qf5B/kj+T/5S/lP+VP5T/lD+R/47/jj+Of49/kf+Uv5g/mT+Zf5c/lj+V/5Q/kn+Pv44/iz+Iv4a/hD+Av76/u7+5v7W/sv+w/6y/p7+df5j/lj+SP47/iT+EP74/t/+sP6L/mz+Uv45/hf+6v6v/nT+SP4h/vP+p/5v/jL+8P6I/kL+9/5w/h7+1f5U/gD+hv4f/sL+Qv7R/lT+zf5i/rL+Wv6s/kL+wv5i/tX+dP7C/lr+tP4a/tX+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7C/lT+sP4a/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/sH+cv7G/mD+pP4e/s-H/N-H/N-H/N-H/N-H/N-H/N-H/M-H/M-H/M-H/M-H/M-H/M-H/M-H/L-H/L-H/L-H/L-H/L-H/L-H/L-H/L-H/K-H/K-H/K-H/K-H/K-H/K-H/K-H/K-H/J-H/J-H/J-H/J-H/J-H/J-H/J-H/J-H/I-H/I-H/I-H/I-H/I-H/I-H/I-H/I-H/H-H/H-H/H-H/H-H/H-H/H-H/H-H/G-H/G-H/G-H/G-H/G-H/G-H/G-H/G-H/F-H/F-H/F-H/F-H/F-H/F-H/F-H/F-H/E-H/E-H/E-H/E-H/E-H/E-H/E-H/E-H/D-H/D-H/D-H/D-H/D-H/D-H/D-H/D-H/C-H/C-H/C-H/C-H/C-H/C-H/C-H/C-H/B-H/B-H/B-H/B-H/B-H/B-H/B-H/B-H/A-H/A-H/A-H/A-H/A-H/A-H/A-H/A-H/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/ah/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/AH/eP/4/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/yf/J/8n/-H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8-H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8f/x//H/8="),
-    };
+        // DOM elementleri
+        const startScreen = document.getElementById('start-screen');
+        const endScreen = document.getElementById('end-screen');
+        const settingsScreen = document.getElementById('settings-screen');
+        const gameControls = document.getElementById('game-controls');
+        const resultText = document.getElementById('result-text');
+        const finalScoreText = document.getElementById('final-score-text');
 
-    // --- OYUN AYARLARI ---
-    const settings = {
-        GRAVITY: 0.6,
-        PLAYER_SPEED: 4,
-        JUMP_FORCE: -13,
-        KICK_FORCE: 15,
-        BALL_FRICTION: 0.98,
-        PLAYER_FRICTION: 0.9,
-        MATCH_DURATION: 90,
-    };
+        // Oyun ayarları
+        const settings = {
+            GRAVITY: 0.6,
+            PLAYER_SPEED: 4,
+            JUMP_FORCE: -13,
+            KICK_FORCE: 15,
+            BALL_FRICTION: 0.98,
+            PLAYER_FRICTION: 0.9,
+            MATCH_DURATION: 90,
+            DIFFICULTY: 'normal',
+            AI_SPEED_MULTIPLIER: 0.8,
+            AI_REACTION_TIME: 10
+        };
 
-    let gameState = 'START';
-    let timer = settings.MATCH_DURATION;
-    let timerInterval = null;
+        // Oyun değişkenleri
+        let gameState = 'MENU';
+        let gameMode = 'single';
+        let timer = settings.MATCH_DURATION;
+        let timerInterval = null;
+        let goalMessageTimeout = null;
+        let goalScored = false; // Gol kontrolü için
 
-    // --- OYUN NESNELERİ ---
-    const groundY = canvas.height - 40;
+        // Görsel öğeleri
+        let player1Image = null;
+        let player2Image = null;
+        let backgroundImage = null;
+        let ballImage = null;
+        let goal1Image = null;
+        let goal2Image = null;
 
-    const player = {
-        x: canvas.width * 0.25,
-        y: groundY,
-        w: 40, h: 60, headRadius: 30,
-        dx: 0, dy: 0,
-        onGround: true,
-        score: 0,
-        color: '#ff4136',
-    };
+        // Varsayılan görseller
+        const defaultImages = {
+            player1: 'images/soloyuncu.png',
+            player2: 'images/sagoyuncu.png',
+            background: 'images/arkaplan.png',
+            ball: 'images/top.png',
+            goal1: 'images/solkale.png',
+            goal2: 'images/sagkale.png'
+        };
 
-    const ai = {
-        x: canvas.width * 0.75,
-        y: groundY,
-        w: 40, h: 60, headRadius: 30,
-        dx: 0, dy: 0,
-        onGround: true,
-        score: 0,
-        color: '#0074d9',
-    };
+        // Saklanan ayarlar
+        let savedSettings = {
+            matchDuration: 90,
+            difficulty: 'normal',
+            player1ImageData: null,
+            player2ImageData: null,
+            backgroundImageData: null,
+            ballImageData: null,
+            goal1ImageData: null,
+            goal2ImageData: null
+        };
 
-    const ball = {
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        r: 15,
-        dx: 0, dy: 0,
-    };
+        // Oyun nesneleri
+        const groundY = canvas.height - 40;
 
-    const goal1 = { x: 0, y: groundY - 120, w: 40, h: 120 };
-    const goal2 = { x: canvas.width - 40, y: groundY - 120, w: 40, h: 120 };
+        const player1 = {
+            x: canvas.width * 0.25,
+            y: groundY,
+            w: 80, h: 60, headRadius: 35,
+            dx: 0, dy: 0,
+            onGround: true,
+            score: 0,
+            color: '#ff4136',
+            keys: {
+                left: 'ArrowLeft',
+                right: 'ArrowRight',
+                up: 'ArrowUp',
+                kick: 'Space'
+            }
+        };
 
-    // --- KONTROL MEKANİZMASI ---
-    const keys = {
-        ArrowLeft: false,
-        ArrowRight: false,
-        ArrowUp: false,
-        Space: false,
-    };
+        const player2 = {
+            x: canvas.width * 0.75,
+            y: groundY,
+            w: 80, h: 60, headRadius: 35,
+            dx: 0, dy: 0,
+            onGround: true,
+            score: 0,
+            color: '#0074d9',
+            keys: {
+                left: 'KeyA',
+                right: 'KeyD',
+                up: 'KeyW',
+                kick: 'KeyS'
+            },
+            isAI: true
+        };
 
-    window.addEventListener('keydown', (e) => {
-        if (keys.hasOwnProperty(e.code)) {
-            e.preventDefault();
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            r: 25,
+            dx: 0, dy: 0
+        };
+
+        const goal1 = { x: 0, y: groundY - 100, w: 100, h: 100 };
+        const goal2 = { x: canvas.width - 100, y: groundY - 100, w: 100, h: 100 };
+
+        // Kontrol sistemi
+        const keys = {};
+
+        window.addEventListener('keydown', (e) => {
             keys[e.code] = true;
-        }
-    });
-    window.addEventListener('keyup', (e) => {
-        if (keys.hasOwnProperty(e.code)) {
             e.preventDefault();
+        });
+
+        window.addEventListener('keyup', (e) => {
             keys[e.code] = false;
-        }
-    });
-    
-    // Mobil kontrol butonları
-    document.getElementById('left-btn').addEventListener('touchstart', (e) => { e.preventDefault(); keys.ArrowLeft = true; });
-    document.getElementById('left-btn').addEventListener('touchend', (e) => { e.preventDefault(); keys.ArrowLeft = false; });
-    document.getElementById('right-btn').addEventListener('touchstart', (e) => { e.preventDefault(); keys.ArrowRight = true; });
-    document.getElementById('right-btn').addEventListener('touchend', (e) => { e.preventDefault(); keys.ArrowRight = false; });
-    document.getElementById('jump-btn').addEventListener('touchstart', (e) => { e.preventDefault(); keys.ArrowUp = true; });
-    document.getElementById('jump-btn').addEventListener('touchend', (e) => { e.preventDefault(); keys.ArrowUp = false; });
-    document.getElementById('kick-btn').addEventListener('touchstart', (e) => { e.preventDefault(); keys.Space = true; });
-    document.getElementById('kick-btn').addEventListener('touchend', (e) => { e.preventDefault(); keys.Space = false; });
+            e.preventDefault();
+        });
 
-
-    // --- ÇİZİM FONKSİYONLARI ---
-
-    function drawField() {
-        // Zemin
-        ctx.fillStyle = '#2ECC40';
-        ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(0, groundY);
-        ctx.lineTo(canvas.width, groundY);
-        ctx.stroke();
-
-        // Kaleler
-        ctx.strokeStyle = '#DDDDDD';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(goal1.x, goal1.y, goal1.w, goal1.h); // Sol kale
-        ctx.strokeRect(goal2.x, goal2.y, goal2.w, goal2.h); // Sağ kale
-    }
-
-    function drawPlayer(p) {
-        // Ayak/Vücut
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x - p.w / 2, p.y - p.h, p.w, p.h);
-
-        // Kafa
-        ctx.beginPath();
-        ctx.arc(p.x, p.y - p.h, p.headRadius, 0, Math.PI * 2);
-        ctx.fillStyle = '#F3D1B9'; // Ten rengi
-        ctx.fill();
-        ctx.strokeStyle = '#000';
-        ctx.stroke();
-
-        // Göz
-        ctx.beginPath();
-        const eyeX = p.x + (ball.x > p.x ? 10 : -10);
-        const eyeY = p.y - p.h - 5;
-        ctx.arc(eyeX, eyeY, 5, 0, Math.PI * 2);
-        ctx.fillStyle = 'white';
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(eyeX + (ball.x - eyeX)/10, eyeY + (ball.y - eyeY)/10, 2, 0, Math.PI * 2);
-        ctx.fillStyle = 'black';
-        ctx.fill();
-    }
-
-    function drawBall() {
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fill();
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-    }
-
-    function drawUI() {
-        ctx.fillStyle = 'white';
-        ctx.font = "32px 'Press Start 2P'";
-        ctx.textAlign = 'center';
-        
-        // Skor
-        ctx.fillText(`${player.score} - ${ai.score}`, canvas.width / 2, 50);
-
-        // Zaman
-        const minutes = Math.floor(timer / 60);
-        const seconds = timer % 60;
-        ctx.fillText(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`, canvas.width / 2, 90);
-    }
-    
-    // --- GÜNCELLEME ve FİZİK FONKSİYONLARI ---
-
-    function updatePhysics(p) {
-        // Yer çekimi
-        if (!p.onGround) {
-            p.dy += settings.GRAVITY;
-        }
-        p.y += p.dy;
-        p.x += p.dx;
-
-        // Sürtünme
-        p.dx *= settings.PLAYER_FRICTION;
-
-        // Zemin kontrolü
-        if (p.y >= groundY) {
-            p.y = groundY;
-            p.dy = 0;
-            p.onGround = true;
-        }
-
-        // Saha sınırları
-        if (p.x - p.headRadius < 0) p.x = p.headRadius;
-        if (p.x + p.headRadius > canvas.width) p.x = canvas.width - p.headRadius;
-    }
-
-    function handlePlayerInput() {
-        if (keys.ArrowLeft) player.dx = -settings.PLAYER_SPEED;
-        if (keys.ArrowRight) player.dx = settings.PLAYER_SPEED;
-        if (keys.ArrowUp && player.onGround) {
-            player.dy = settings.JUMP_FORCE;
-            player.onGround = false;
-        }
-    }
-    
-    function updateAI() {
-        const distToBallX = ball.x - ai.x;
-        const distToBallY = ball.y - ai.y;
-
-        // Hücum / Savunma Modu
-        if (ball.x > canvas.width / 2) { // Top kendi sahasındaysa hücum et
-            if (distToBallX > 10) {
-                ai.dx = settings.PLAYER_SPEED * 0.8;
-            } else if (distToBallX < -10) {
-                ai.dx = -settings.PLAYER_SPEED * 0.8;
+        // Varsayılan görselleri yükleme
+        function loadDefaultImages() {
+            if (defaultImages.player1) {
+                const img = new Image();
+                img.onload = () => {
+                    if (!savedSettings.player1ImageData) {
+                        player1Image = img;
+                        document.getElementById('p1-preview').innerHTML = '<img src="' + defaultImages.player1 + '" alt="Sol Oyuncu">';
+                    }
+                };
+                img.onerror = () => {
+                    document.getElementById('p1-preview').innerHTML = 'Varsayılan';
+                };
+                img.src = defaultImages.player1;
             }
-        } else { // Top rakip sahadaysa kalesine yakın dur
-            const defensivePos = canvas.width * 0.75;
-            if (ai.x < defensivePos) {
-                 ai.dx = settings.PLAYER_SPEED * 0.7;
-            } else if (ai.x > defensivePos + 10) {
-                 ai.dx = -settings.PLAYER_SPEED * 0.7;
+
+            if (defaultImages.player2) {
+                const img = new Image();
+                img.onload = () => {
+                    if (!savedSettings.player2ImageData) {
+                        player2Image = img;
+                        document.getElementById('p2-preview').innerHTML = '<img src="' + defaultImages.player2 + '" alt="Sağ Oyuncu">';
+                    }
+                };
+                img.onerror = () => {
+                    document.getElementById('p2-preview').innerHTML = 'Varsayılan';
+                };
+                img.src = defaultImages.player2;
+            }
+
+            if (defaultImages.background) {
+                const img = new Image();
+                img.onload = () => {
+                    if (!savedSettings.backgroundImageData) {
+                        backgroundImage = img;
+                        document.getElementById('bg-preview').innerHTML = '<img src="' + defaultImages.background + '" alt="Arkaplan">';
+                    }
+                };
+                img.onerror = () => {
+                    document.getElementById('bg-preview').innerHTML = 'Varsayılan';
+                };
+                img.src = defaultImages.background;
+            }
+
+            if (defaultImages.ball) {
+                const img = new Image();
+                img.onload = () => {
+                    if (!savedSettings.ballImageData) {
+                        ballImage = img;
+                        document.getElementById('ball-preview').innerHTML = '<img src="' + defaultImages.ball + '" alt="Top">';
+                    }
+                };
+                img.onerror = () => {
+                    document.getElementById('ball-preview').innerHTML = 'Varsayılan';
+                };
+                img.src = defaultImages.ball;
+            }
+
+            if (defaultImages.goal1) {
+                const img = new Image();
+                img.onload = () => {
+                    if (!savedSettings.goal1ImageData) {
+                        goal1Image = img;
+                        document.getElementById('goal1-preview').innerHTML = '<img src="' + defaultImages.goal1 + '" alt="Sol Kale">';
+                    }
+                };
+                img.onerror = () => {
+                    document.getElementById('goal1-preview').innerHTML = 'Varsayılan';
+                };
+                img.src = defaultImages.goal1;
+            }
+
+            if (defaultImages.goal2) {
+                const img = new Image();
+                img.onload = () => {
+                    if (!savedSettings.goal2ImageData) {
+                        goal2Image = img;
+                        document.getElementById('goal2-preview').innerHTML = '<img src="' + defaultImages.goal2 + '" alt="Sağ Kale">';
+                    }
+                };
+                img.onerror = () => {
+                    document.getElementById('goal2-preview').innerHTML = 'Varsayılan';
+                };
+                img.src = defaultImages.goal2;
             }
         }
 
-        // Zıplama kararı
-        if (ai.onGround && distToBallY < -50 && Math.abs(distToBallX) < 100) {
-            ai.dy = settings.JUMP_FORCE;
-            ai.onGround = false;
-        }
-    }
+        // Oyun kontrolleri kurulumu
+        function setupGameControls() {
+            const touchEvents = ['touchstart', 'touchend'];
+            const mouseEvents = ['mousedown', 'mouseup'];
+            
+            function addControlEvents(elementId, key) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                
+                touchEvents.forEach(event => {
+                    element.addEventListener(event, (e) => {
+                        e.preventDefault();
+                        keys[key] = event === 'touchstart';
+                    });
+                });
+                
+                mouseEvents.forEach(event => {
+                    element.addEventListener(event, (e) => {
+                        e.preventDefault();
+                        keys[key] = event === 'mousedown';
+                    });
+                });
+                
+                element.addEventListener('mouseleave', (e) => {
+                    e.preventDefault();
+                    keys[key] = false;
+                });
+            }
 
-    function updateBall() {
-        ball.dy += settings.GRAVITY * 0.7; // Top daha hafif olsun
-        ball.x += ball.dx;
-        ball.y += ball.dy;
-
-        ball.dx *= settings.BALL_FRICTION;
-        ball.dy *= settings.BALL_FRICTION;
-
-        // Duvarlardan sekme
-        if (ball.x + ball.r > canvas.width || ball.x - ball.r < 0) {
-            ball.dx *= -0.8;
-            if (ball.x + ball.r > canvas.width) ball.x = canvas.width - ball.r;
-            if (ball.x - ball.r < 0) ball.x = ball.r;
-        }
-        if (ball.y - ball.r < 0) { // Tavandan sekme
-            ball.dy *= -0.8;
-            ball.y = ball.r;
-        }
-
-        // Yerden sekme
-        if (ball.y + ball.r > groundY) {
-            ball.y = groundY - ball.r;
-            ball.dy *= -0.7;
-        }
-    }
-
-    function checkCollision(p, b) {
-        // Kafa ile çarpışma
-        let distHead = Math.sqrt((p.x - b.x)**2 + ((p.y - p.h) - b.y)**2);
-        if (distHead < p.headRadius + b.r) {
-            handleCollision(p, b, true);
-        }
-
-        // Vücut ile çarpışma
-        let closestX = Math.max(p.x - p.w/2, Math.min(b.x, p.x + p.w/2));
-        let closestY = Math.max(p.y - p.h, Math.min(b.y, p.y));
-        let distBody = Math.sqrt((closestX - b.x)**2 + (closestY - b.y)**2);
-        if(distBody < b.r){
-            handleCollision(p, b, false);
-        }
-    }
-    
-    function handleCollision(p, b, isHead) {
-        const angle = Math.atan2(b.y - (p.y - p.h), b.x - p.x);
-        let force = isHead ? settings.KICK_FORCE * 1.2 : settings.KICK_FORCE * 0.8;
-        
-        // Eğer oyuncu şut tuşuna basıyorsa ekstra güç
-        if ((p === player && keys.Space) || (p === ai && Math.abs(b.x - ai.x) < 80)) {
-            force *= 1.5;
-            if (p === player) sounds.kick.play();
+            addControlEvents('p1-left', player1.keys.left);
+            addControlEvents('p1-right', player1.keys.right);
+            addControlEvents('p1-jump', player1.keys.up);
+            addControlEvents('p1-kick', player1.keys.kick);
+            addControlEvents('p2-left', player2.keys.left);
+            addControlEvents('p2-right', player2.keys.right);
+            addControlEvents('p2-jump', player2.keys.up);
+            addControlEvents('p2-kick', player2.keys.kick);
         }
 
-        b.dx = Math.cos(angle) * force + p.dx * 0.5;
-        b.dy = Math.sin(angle) * force + p.dy * 0.5;
-    }
+        // Çizim fonksiyonları
+        function drawField() {
+            if (backgroundImage) {
+                ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else {
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, '#87CEEB');
+                gradient.addColorStop(0.6, '#98D8E8');
+                gradient.addColorStop(1, '#2ECC40');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            const groundGradient = ctx.createLinearGradient(0, groundY, 0, canvas.height);
+            groundGradient.addColorStop(0, '#2ECC40');
+            groundGradient.addColorStop(1, '#27AE60');
+            ctx.fillStyle = groundGradient;
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+            
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, groundY);
+            ctx.lineTo(canvas.width, groundY);
+            ctx.stroke();
 
-    function checkGoal() {
-        if (ball.y > goal1.y) {
-            if (ball.x - ball.r < goal1.w) {
-                goalScored(ai);
-            } else if (ball.x + ball.r > goal2.x) {
-                goalScored(player);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, groundY);
+            ctx.lineTo(canvas.width / 2, groundY - 120);
+            ctx.stroke();
+
+            if (goal1Image) {
+                ctx.drawImage(goal1Image, goal1.x, goal1.y, goal1.w, goal1.h);
+            } else {
+                ctx.strokeStyle = '#DDDDDD';
+                ctx.lineWidth = 5;
+                ctx.strokeRect(goal1.x, goal1.y, goal1.w, goal1.h);
+            }
+
+            if (goal2Image) {
+                ctx.drawImage(goal2Image, goal2.x, goal2.y, goal2.w, goal2.h);
+            } else {
+                ctx.strokeStyle = '#DDDDDD';
+                ctx.lineWidth = 5;
+                ctx.strokeRect(goal2.x, goal2.y, goal2.w, goal2.h);
             }
         }
-    }
-    
-    function goalScored(scorer) {
-        scorer.score++;
-        sounds.goal.play();
-        resetPositions();
-    }
 
-    function resetPositions() {
-        player.x = canvas.width * 0.25;
-        player.y = groundY;
-        player.dx = player.dy = 0;
-        player.onGround = true;
+        function drawPlayer(p, playerImage) {
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 5;
+            ctx.shadowOffsetY = 3;
 
-        ai.x = canvas.width * 0.75;
-        ai.y = groundY;
-        ai.dx = ai.dy = 0;
-        ai.onGround = true;
+            if (playerImage) {
+                ctx.drawImage(playerImage, 
+                    p.x - p.headRadius, p.y - p.h - p.headRadius, 
+                    p.headRadius * 2, p.headRadius * 2);
+            } else {
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x - p.w / 2, p.y - p.h, p.w, p.h);
 
-        ball.x = canvas.width / 2;
-        ball.y = canvas.height / 3;
-        ball.dx = (Math.random() - 0.5) * 5;
-        ball.dy = 0;
-    }
+                ctx.beginPath();
+                ctx.arc(p.x, p.y - p.h, p.headRadius, 0, Math.PI * 2);
+                ctx.fillStyle = '#F3D1B9';
+                ctx.fill();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.stroke();
 
-    // --- OYUN AKIŞI ---
+                const eyeDirection = ball.x > p.x ? 1 : -1;
+                ctx.shadowBlur = 0;
+                
+                ctx.beginPath();
+                ctx.arc(p.x - 12, p.y - p.h - 7, 6, 0, Math.PI * 2);
+                ctx.fillStyle = 'white';
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(p.x - 12 + eyeDirection * 3, p.y - p.h - 7, 3, 0, Math.PI * 2);
+                ctx.fillStyle = 'black';
+                ctx.fill();
 
-    function startGame() {
-        startScreen.style.display = 'none';
-        endScreen.style.display = 'none';
-        gameState = 'PLAYING';
-        player.score = 0;
-        ai.score = 0;
-        timer = settings.MATCH_DURATION;
-        resetPositions();
+                ctx.beginPath();
+                ctx.arc(p.x + 12, p.y - p.h - 7, 6, 0, Math.PI * 2);
+                ctx.fillStyle = 'white';
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(p.x + 12 + eyeDirection * 3, p.y - p.h - 7, 3, 0, Math.PI * 2);
+                ctx.fillStyle = 'black';
+                ctx.fill();
 
-        timerInterval = setInterval(() => {
-            if(gameState === 'PLAYING') {
-                timer--;
-                if (timer <= 0) {
-                    endGame();
+                ctx.beginPath();
+                ctx.arc(p.x, p.y - p.h + 14, 7, 0, Math.PI);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
+
+        function drawBall() {
+            ctx.save();
+            
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetY = 5;
+
+            if (ballImage) {
+                ctx.drawImage(ballImage, 
+                    ball.x - ball.r, ball.y - ball.r, 
+                    ball.r * 2, ball.r * 2);
+            } else {
+                const gradient = ctx.createRadialGradient(
+                    ball.x - 5, ball.y - 5, 0,
+                    ball.x, ball.y, ball.r
+                );
+                gradient.addColorStop(0, '#FFFFFF');
+                gradient.addColorStop(1, '#E0E0E0');
+                
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.r * 0.3, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                for(let i = 0; i < 6; i++) {
+                    const angle = (i * Math.PI * 2) / 6;
+                    ctx.beginPath();
+                    ctx.moveTo(ball.x, ball.y);
+                    ctx.lineTo(
+                        ball.x + Math.cos(angle) * ball.r * 0.8,
+                        ball.y + Math.sin(angle) * ball.r * 0.8
+                    );
+                    ctx.stroke();
                 }
             }
-        }, 1000);
-    }
-    
-    function endGame() {
-        clearInterval(timerInterval);
-        gameState = 'GAME_OVER';
-        sounds.whistle.play();
 
-        if (player.score > ai.score) {
-            resultText.textContent = 'KAZANDIN!';
-            resultText.style.color = '#7FDBFF';
-        } else if (ai.score > player.score) {
-            resultText.textContent = 'KAYBETTİN!';
-            resultText.style.color = '#FF4136';
+            ctx.restore();
+        }
+
+        function drawUI() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(canvas.width / 2 - 120, 10, 240, 80);
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(canvas.width / 2 - 120, 10, 240, 80);
+
+            ctx.fillStyle = 'white';
+            ctx.font = "24px Arial";
+            ctx.textAlign = 'center';
+            
+            ctx.fillStyle = '#FFD700';
+            ctx.fillText(`${player1.score} - ${player2.score}`, canvas.width / 2, 40);
+
+            const minutes = Math.floor(timer / 60);
+            const seconds = timer % 60;
+            ctx.fillStyle = timer <= 10 ? '#FF4136' : 'white';
+            ctx.font = "16px Arial";
+            ctx.fillText(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`, canvas.width / 2, 70);
+
+            if (gameMode === 'two-player') {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(10, 10, 150, 30);
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(10, 10, 150, 30);
+                ctx.fillStyle = '#FFD700';
+                ctx.font = "12px Arial";
+                ctx.textAlign = 'left';
+                ctx.fillText('İKİ OYUNCU', 15, 30);
+            }
+        }
+
+        // Fizik fonksiyonları
+        function updatePhysics(p) {
+            if (!p.onGround) {
+                p.dy += settings.GRAVITY;
+            }
+            p.y += p.dy;
+            p.x += p.dx;
+
+            p.dx *= settings.PLAYER_FRICTION;
+
+            if (p.y >= groundY) {
+                p.y = groundY;
+                p.dy = 0;
+                p.onGround = true;
+            }
+
+            if (p.x - p.headRadius < 0) p.x = p.headRadius;
+            if (p.x + p.headRadius > canvas.width) p.x = canvas.width - p.headRadius;
+        }
+
+        function handlePlayerInput(p) {
+            if (keys[p.keys.left]) p.dx = -settings.PLAYER_SPEED;
+            if (keys[p.keys.right]) p.dx = settings.PLAYER_SPEED;
+            if (keys[p.keys.up] && p.onGround) {
+                p.dy = settings.JUMP_FORCE;
+                p.onGround = false;
+            }
+        }
+
+        function updateAI(ai) {
+            if (!ai.isAI) return;
+
+            const distToBallX = ball.x - ai.x;
+            const distToBallY = ball.y - ai.y;
+            const speedMultiplier = settings.AI_SPEED_MULTIPLIER || 0.8;
+            const reactionTime = settings.AI_REACTION_TIME || 10;
+
+            if (Math.random() * 60 < reactionTime) {
+                return;
+            }
+
+            if (ball.x > canvas.width / 2) {
+                if (distToBallX > 10) {
+                    ai.dx = settings.PLAYER_SPEED * speedMultiplier;
+                } else if (distToBallX < -10) {
+                    ai.dx = -settings.PLAYER_SPEED * speedMultiplier;
+                }
+
+                if (ai.onGround && distToBallY < -30 && Math.abs(distToBallX) < 80) {
+                    ai.dy = settings.JUMP_FORCE;
+                    ai.onGround = false;
+                }
+            } else {
+                const defensivePos = canvas.width * 0.75;
+                if (ai.x < defensivePos - 20) {
+                    ai.dx = settings.PLAYER_SPEED * speedMultiplier * 0.7;
+                } else if (ai.x > defensivePos + 20) {
+                    ai.dx = -settings.PLAYER_SPEED * speedMultiplier * 0.7;
+                }
+            }
+        }
+
+        function updateBall() {
+            ball.dy += settings.GRAVITY * 0.7;
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            ball.dx *= settings.BALL_FRICTION;
+            ball.dy *= settings.BALL_FRICTION;
+
+            if (ball.x + ball.r > canvas.width || ball.x - ball.r < 0) {
+                ball.dx *= -0.8;
+                if (ball.x + ball.r > canvas.width) ball.x = canvas.width - ball.r;
+                if (ball.x - ball.r < 0) ball.x = ball.r;
+            }
+            
+            if (ball.y - ball.r < 0) {
+                ball.dy *= -0.8;
+                ball.y = ball.r;
+            }
+
+            if (ball.y + ball.r > groundY) {
+                ball.y = groundY - ball.r;
+                ball.dy *= -0.7;
+            }
+        }
+
+        function checkCollision(p, b) {
+            let distHead = Math.sqrt((p.x - b.x)**2 + ((p.y - p.h) - b.y)**2);
+            if (distHead < p.headRadius + b.r) {
+                handleCollision(p, b, true);
+            }
+
+            let closestX = Math.max(p.x - p.w/2, Math.min(b.x, p.x + p.w/2));
+            let closestY = Math.max(p.y - p.h, Math.min(b.y, p.y));
+            let distBody = Math.sqrt((closestX - b.x)**2 + (closestY - b.y)**2);
+            if(distBody < b.r){
+                handleCollision(p, b, false);
+            }
+        }
+
+        function handleCollision(p, b, isHead) {
+            const angle = Math.atan2(b.y - (p.y - p.h), b.x - p.x);
+            let force = isHead ? settings.KICK_FORCE * 1.2 : settings.KICK_FORCE * 0.8;
+            
+            const isKicking = keys[p.keys.kick] || (p.isAI && Math.abs(b.x - p.x) < 80);
+            if (isKicking) {
+                force *= 1.5;
+            }
+
+            b.dx = Math.cos(angle) * force + p.dx * 0.5;
+            b.dy = Math.sin(angle) * force + p.dy * 0.5;
+        }
+
+        function checkGoal() {
+            if (goalScored) return; // Eğer gol olmuşsa tekrar kontrol etme
+            
+            if (ball.y > goal1.y && ball.y < goal1.y + goal1.h) {
+                if (ball.x - ball.r < goal1.x + goal1.w) {
+                    handleGoalScored(player2);
+                } else if (ball.x + ball.r > goal2.x) {
+                    handleGoalScored(player1);
+                }
+            }
+        }
+
+        function handleGoalScored(scorer) {
+            if (goalScored) return; // Çift gol önleme
+            
+            goalScored = true; // Gol bayrağını set et
+            scorer.score++;
+            
+            // Alkış sesi çal
+            const applauseSound = new Audio('sounds/alkis.mp3');
+            applauseSound.play().catch(() => {
+                console.log('Alkış sesi çalınamadı');
+            });
+            
+            // Gol mesajı göster
+            showGoalMessage();
+            
+            setTimeout(() => {
+                resetPositions();
+                goalScored = false; // Reset gol bayrağı
+            }, 2000); // 2 saniye bekle
+        }
+
+        function showGoalMessage() {
+            if (!goalMessageTimeout) {
+                goalMessageTimeout = setTimeout(() => {
+                    goalMessageTimeout = null;
+                }, 1000);
+            }
+        }
+
+        function drawGoalMessage() {
+            if (goalMessageTimeout) {
+                ctx.save();
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 72px Arial';
+                ctx.textAlign = 'center';
+                ctx.strokeStyle = '#FF0000';
+                ctx.lineWidth = 4;
+                
+                const goalText = 'Goooolll!!!!';
+                ctx.strokeText(goalText, canvas.width / 2, canvas.height / 2);
+                ctx.fillText(goalText, canvas.width / 2, canvas.height / 2);
+                ctx.restore();
+            }
+        }
+
+        function resetPositions() {
+            player1.x = canvas.width * 0.25;
+            player1.y = groundY;
+            player1.dx = player1.dy = 0;
+            player1.onGround = true;
+
+            player2.x = canvas.width * 0.75;
+            player2.y = groundY;
+            player2.dx = player2.dy = 0;
+            player2.onGround = true;
+
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.dx = (Math.random() - 0.5) * 5;
+            ball.dy = 0;
+            
+            goalScored = false; // Reset gol bayrağı
+        }
+
+        function updateControlVisibility() {
+            const p2Controls = document.querySelectorAll('.p2-left, .p2-right, .p2-jump, .p2-kick');
+            if (gameMode === 'single') {
+                p2Controls.forEach(ctrl => ctrl.style.display = 'none');
+            } else {
+                p2Controls.forEach(ctrl => ctrl.style.display = 'flex');
+            }
+        }
+
+        // Menü fonksiyonları
+        function showMainMenu() {
+            gameState = 'MENU';
+            startScreen.style.display = 'flex';
+            endScreen.style.display = 'none';
+            settingsScreen.style.display = 'none';
+            gameControls.style.display = 'none';
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        function showSettings() {
+            startScreen.style.display = 'none';
+            settingsScreen.style.display = 'flex';
+            loadSavedSettings();
+        }
+
+        function saveSettings() {
+            const matchDuration = document.getElementById('match-duration').value;
+            const difficulty = document.getElementById('difficulty').value;
+            
+            savedSettings.matchDuration = parseInt(matchDuration);
+            savedSettings.difficulty = difficulty;
+            
+            settings.MATCH_DURATION = parseInt(matchDuration);
+            settings.DIFFICULTY = difficulty;
+            
+            switch(difficulty) {
+                case 'easy':
+                    settings.AI_SPEED_MULTIPLIER = 0.6;
+                    settings.AI_REACTION_TIME = 20;
+                    break;
+                case 'normal':
+                    settings.AI_SPEED_MULTIPLIER = 0.8;
+                    settings.AI_REACTION_TIME = 10;
+                    break;
+                case 'hard':
+                    settings.AI_SPEED_MULTIPLIER = 1.0;
+                    settings.AI_REACTION_TIME = 5;
+                    break;
+            }
+        }
+
+        function loadSavedSettings() {
+            document.getElementById('match-duration').value = savedSettings.matchDuration;
+            document.getElementById('difficulty').value = savedSettings.difficulty;
+            
+            settings.MATCH_DURATION = savedSettings.matchDuration;
+            settings.DIFFICULTY = savedSettings.difficulty;
+            
+            switch(savedSettings.difficulty) {
+                case 'easy':
+                    settings.AI_SPEED_MULTIPLIER = 0.6;
+                    settings.AI_REACTION_TIME = 20;
+                    break;
+                case 'normal':
+                    settings.AI_SPEED_MULTIPLIER = 0.8;
+                    settings.AI_REACTION_TIME = 10;
+                    break;
+                case 'hard':
+                    settings.AI_SPEED_MULTIPLIER = 1.0;
+                    settings.AI_REACTION_TIME = 5;
+                    break;
+            }
+            
+            if (savedSettings.player1ImageData) {
+                const img = new Image();
+                img.onload = () => {
+                    player1Image = img;
+                    document.getElementById('p1-preview').innerHTML = '<img src="' + savedSettings.player1ImageData + '" alt="Oyuncu 1">';
+                };
+                img.src = savedSettings.player1ImageData;
+            }
+            
+            if (savedSettings.player2ImageData) {
+                const img = new Image();
+                img.onload = () => {
+                    player2Image = img;
+                    document.getElementById('p2-preview').innerHTML = '<img src="' + savedSettings.player2ImageData + '" alt="Oyuncu 2">';
+                };
+                img.src = savedSettings.player2ImageData;
+            }
+            
+            if (savedSettings.backgroundImageData) {
+                const img = new Image();
+                img.onload = () => {
+                    backgroundImage = img;
+                    document.getElementById('bg-preview').innerHTML = '<img src="' + savedSettings.backgroundImageData + '" alt="Arkaplan">';
+                };
+                img.src = savedSettings.backgroundImageData;
+            }
+            
+            if (savedSettings.ballImageData) {
+                const img = new Image();
+                img.onload = () => {
+                    ballImage = img;
+                    document.getElementById('ball-preview').innerHTML = '<img src="' + savedSettings.ballImageData + '" alt="Top">';
+                };
+                img.src = savedSettings.ballImageData;
+            }
+            
+            if (savedSettings.goal1ImageData) {
+                const img = new Image();
+                img.onload = () => {
+                    goal1Image = img;
+                    document.getElementById('goal1-preview').innerHTML = '<img src="' + savedSettings.goal1ImageData + '" alt="Sol Kale">';
+                };
+                img.src = savedSettings.goal1ImageData;
+            }
+            
+            if (savedSettings.goal2ImageData) {
+                const img = new Image();
+                img.onload = () => {
+                    goal2Image = img;
+                    document.getElementById('goal2-preview').innerHTML = '<img src="' + savedSettings.goal2ImageData + '" alt="Sağ Kale">';
+                };
+                img.src = savedSettings.goal2ImageData;
+            }
+        }
+
+        // Oyun akışı fonksiyonları
+        function startGame() {
+            gameState = 'PLAYING';
+            startScreen.style.display = 'none';
+            endScreen.style.display = 'none';
+            settingsScreen.style.display = 'none';
+            gameControls.style.display = 'block';
+            
+            updateControlVisibility();
+            
+            player1.score = 0;
+            player2.score = 0;
+            timer = settings.MATCH_DURATION;
+            goalScored = false; // Reset gol bayrağı
+            resetPositions();
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if(gameState === 'PLAYING') {
+                    timer--;
+                    if (timer <= 0) {
+                        endGame();
+                    }
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            gameState = 'GAME_OVER';
+
+            if (player1.score > player2.score) {
+                resultText.textContent = gameMode === 'single' ? 'KAZANDIN!' : 'OYUNCU 1 KAZANDI!';
+                resultText.style.color = '#00FF00';
+            } else if (player2.score > player1.score) {
+                resultText.textContent = gameMode === 'single' ? 'KAYBETTİN!' : 'OYUNCU 2 KAZANDI!';
+                resultText.style.color = '#FF4136';
+            } else {
+                resultText.textContent = 'BERABERE!';
+                resultText.style.color = '#FFD700';
+            }
+            
+            finalScoreText.textContent = `Skor: ${player1.score} - ${player2.score}`;
+            endScreen.style.display = 'flex';
+            gameControls.style.display = 'none';
+        }
+
+        // Ana oyun döngüsü
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawField();
+            
+            if (gameState === 'PLAYING') {
+                handlePlayerInput(player1);
+                if (!player2.isAI) {
+                    handlePlayerInput(player2);
+                } else {
+                    updateAI(player2);
+                }
+
+                updatePhysics(player1);
+                updatePhysics(player2);
+                updateBall();
+
+                checkCollision(player1, ball);
+                checkCollision(player2, ball);
+                checkGoal();
+            }
+
+            drawPlayer(player1, player1Image);
+            drawPlayer(player2, player2Image);
+            drawBall();
+            drawUI();
+            
+            // Gol mesajını en üstte çiz
+            drawGoalMessage();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event listener'lar
+        function setupEventListeners() {
+            document.getElementById('single-mode-btn').addEventListener('click', () => {
+                gameMode = 'single';
+                player2.isAI = true;
+                startGame();
+            });
+
+            document.getElementById('two-player-mode-btn').addEventListener('click', () => {
+                gameMode = 'two-player';
+                player2.isAI = false;
+                startGame();
+            });
+
+            document.getElementById('settings-btn').addEventListener('click', () => {
+                showSettings();
+            });
+
+            document.getElementById('restart-btn').addEventListener('click', () => {
+                startGame();
+            });
+
+            document.getElementById('main-menu-btn').addEventListener('click', () => {
+                showMainMenu();
+            });
+
+            document.getElementById('save-settings-btn').addEventListener('click', () => {
+                saveSettings();
+                showMainMenu();
+            });
+
+            document.getElementById('back-to-menu-btn').addEventListener('click', () => {
+                showMainMenu();
+            });
+
+            // Dosya yükleme
+            document.getElementById('p1-char-input').addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            player1Image = img;
+                            savedSettings.player1ImageData = event.target.result;
+                            document.getElementById('p1-preview').innerHTML = '<img src="' + event.target.result + '" alt="Oyuncu 1">';
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+
+            document.getElementById('p2-char-input').addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            player2Image = img;
+                            savedSettings.player2ImageData = event.target.result;
+                            document.getElementById('p2-preview').innerHTML = '<img src="' + event.target.result + '" alt="Oyuncu 2">';
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+
+            document.getElementById('bg-input').addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            backgroundImage = img;
+                            savedSettings.backgroundImageData = event.target.result;
+                            document.getElementById('bg-preview').innerHTML = '<img src="' + event.target.result + '" alt="Arkaplan">';
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+
+            document.getElementById('ball-input').addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            ballImage = img;
+                            savedSettings.ballImageData = event.target.result;
+                            document.getElementById('ball-preview').innerHTML = '<img src="' + event.target.result + '" alt="Top">';
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+
+            document.getElementById('goal1-input').addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            goal1Image = img;
+                            savedSettings.goal1ImageData = event.target.result;
+                            document.getElementById('goal1-preview').innerHTML = '<img src="' + event.target.result + '" alt="Sol Kale">';
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+
+            document.getElementById('goal2-input').addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            goal2Image = img;
+                            savedSettings.goal2ImageData = event.target.result;
+                            document.getElementById('goal2-preview').innerHTML = '<img src="' + event.target.result + '" alt="Sağ Kale">';
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+
+            // Temizleme butonları
+            document.getElementById('clear-p1').addEventListener('click', () => {
+                player1Image = null;
+                savedSettings.player1ImageData = null;
+                if (defaultImages.player1) {
+                    const img = new Image();
+                    img.onload = () => {
+                        player1Image = img;
+                        document.getElementById('p1-preview').innerHTML = '<img src="' + defaultImages.player1 + '" alt="Sol Oyuncu">';
+                    };
+                    img.onerror = () => {
+                        document.getElementById('p1-preview').innerHTML = 'Varsayılan';
+                    };
+                    img.src = defaultImages.player1;
+                } else {
+                    document.getElementById('p1-preview').innerHTML = 'Varsayılan';
+                }
+            });
+
+            document.getElementById('clear-p2').addEventListener('click', () => {
+                player2Image = null;
+                savedSettings.player2ImageData = null;
+                if (defaultImages.player2) {
+                    const img = new Image();
+                    img.onload = () => {
+                        player2Image = img;
+                        document.getElementById('p2-preview').innerHTML = '<img src="' + defaultImages.player2 + '" alt="Sağ Oyuncu">';
+                    };
+                    img.onerror = () => {
+                        document.getElementById('p2-preview').innerHTML = 'Varsayılan';
+                    };
+                    img.src = defaultImages.player2;
+                } else {
+                    document.getElementById('p2-preview').innerHTML = 'Varsayılan';
+                }
+            });
+
+            document.getElementById('clear-bg').addEventListener('click', () => {
+                backgroundImage = null;
+                savedSettings.backgroundImageData = null;
+                if (defaultImages.background) {
+                    const img = new Image();
+                    img.onload = () => {
+                        backgroundImage = img;
+                        document.getElementById('bg-preview').innerHTML = '<img src="' + defaultImages.background + '" alt="Arkaplan">';
+                    };
+                    img.onerror = () => {
+                        document.getElementById('bg-preview').innerHTML = 'Varsayılan';
+                    };
+                    img.src = defaultImages.background;
+                } else {
+                    document.getElementById('bg-preview').innerHTML = 'Varsayılan';
+                }
+            });
+
+            document.getElementById('clear-ball').addEventListener('click', () => {
+                ballImage = null;
+                savedSettings.ballImageData = null;
+                if (defaultImages.ball) {
+                    const img = new Image();
+                    img.onload = () => {
+                        ballImage = img;
+                        document.getElementById('ball-preview').innerHTML = '<img src="' + defaultImages.ball + '" alt="Top">';
+                    };
+                    img.onerror = () => {
+                        document.getElementById('ball-preview').innerHTML = 'Varsayılan';
+                    };
+                    img.src = defaultImages.ball;
+                } else {
+                    document.getElementById('ball-preview').innerHTML = 'Varsayılan';
+                }
+            });
+
+            document.getElementById('clear-goal1').addEventListener('click', () => {
+                goal1Image = null;
+                savedSettings.goal1ImageData = null;
+                if (defaultImages.goal1) {
+                    const img = new Image();
+                    img.onload = () => {
+                        goal1Image = img;
+                        document.getElementById('goal1-preview').innerHTML = '<img src="' + defaultImages.goal1 + '" alt="Sol Kale">';
+                    };
+                    img.onerror = () => {
+                        document.getElementById('goal1-preview').innerHTML = 'Varsayılan';
+                    };
+                    img.src = defaultImages.goal1;
+                } else {
+                    document.getElementById('goal1-preview').innerHTML = 'Varsayılan';
+                }
+            });
+
+            document.getElementById('clear-goal2').addEventListener('click', () => {
+                goal2Image = null;
+                savedSettings.goal2ImageData = null;
+                if (defaultImages.goal2) {
+                    const img = new Image();
+                    img.onload = () => {
+                        goal2Image = img;
+                        document.getElementById('goal2-preview').innerHTML = '<img src="' + defaultImages.goal2 + '" alt="Sağ Kale">';
+                    };
+                    img.onerror = () => {
+                        document.getElementById('goal2-preview').innerHTML = 'Varsayılan';
+                    };
+                    img.src = defaultImages.goal2;
+                } else {
+                    document.getElementById('goal2-preview').innerHTML = 'Varsayılan';
+                }
+            });
+        }
+
+        // Başlatma fonksiyonu
+        function init() {
+            setupGameControls();
+            setupEventListeners();
+            loadDefaultImages();
+            loadSavedSettings();
+            showMainMenu();
+            gameLoop();
+        }
+
+        // Sayfa yüklendiğinde başlat
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', init);
         } else {
-            resultText.textContent = 'BERABERE!';
-            resultText.style.color = '#AAAAAA';
+            init();
         }
-        finalScoreText.textContent = `Skor: ${player.score} - ${ai.score}`;
-        endScreen.style.display = 'flex';
-    }
-
-
-    startBtn.addEventListener('click', startGame);
-    restartBtn.addEventListener('click', startGame);
-
-    function gameLoop() {
-        // Arka planı temizle
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Sahayı çiz
-        drawField();
-        
-        if (gameState === 'PLAYING') {
-            // Güncellemeler
-            handlePlayerInput();
-            updateAI();
-            updatePhysics(player);
-            updatePhysics(ai);
-            updateBall();
-
-            // Çarpışmalar
-            checkCollision(player, ball);
-            checkCollision(ai, ball);
-            checkGoal();
-        }
-
-        // Çizimler
-        drawPlayer(player);
-        drawPlayer(ai);
-        drawBall();
-        drawUI();
-        
-        requestAnimationFrame(gameLoop);
-    }
-
-    // Oyunu başlat
-    gameLoop();
-
     </script>
 </body>
 </html>
