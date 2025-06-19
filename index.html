@@ -128,31 +128,6 @@
             z-index: 5;
         }
 
-        .home-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 60px;
-            height: 40px;
-            background: linear-gradient(45deg, #FF5722, #D84315);
-            color: white;
-            border: 2px solid white;
-            border-radius: 8px;
-            font-size: 10px;
-            cursor: pointer;
-            pointer-events: all;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            transition: all 0.3s;
-        }
-
-        .home-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 15px rgba(255, 87, 34, 0.6);
-        }
-
         .control-btn {
             position: absolute;
             width: 80px;
@@ -248,6 +223,36 @@
             color: #0074d9;
         }
 
+        .home-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 60px;
+            height: 60px;
+            border: 3px solid white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            pointer-events: all;
+            touch-action: none;
+            user-select: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+            background: rgba(255, 193, 7, 0.8);
+            border-color: #FFC107;
+            color: white;
+            cursor: pointer;
+        }
+
+        .home-btn:hover, .home-btn:active {
+            transform: scale(0.9);
+            opacity: 0.8;
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+        }
+
         @media (max-width: 768px) {
             body { padding: 5px; }
             
@@ -262,14 +267,6 @@
                 font-size: 1.5rem;
             }
 
-            .home-btn {
-                width: 50px;
-                height: 35px;
-                font-size: 8px;
-                top: 10px;
-                right: 10px;
-            }
-
             .p1-left { left: 10px; }
             .p1-right { left: 80px; }
             .p1-jump { left: 10px; }
@@ -278,6 +275,14 @@
             .p2-right { right: 10px; }
             .p2-jump { right: 80px; }
             .p2-kick { right: 10px; }
+            
+            .home-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+                top: 10px;
+                right: 10px;
+            }
         }
 
         .settings-container {
@@ -307,6 +312,31 @@
             border: 2px solid white;
             border-radius: 5px;
             color: white;
+        }
+
+        .setting-item input[type="range"] {
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .setting-item input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #FFD700;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .setting-item input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #FFD700;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
         }
 
         .file-input {
@@ -375,8 +405,7 @@
         <canvas id="gameCanvas" width="800" height="450"></canvas>
         
         <div class="game-controls" id="game-controls" style="display: none;">
-            <button class="home-btn" id="game-home-btn">🏠 ANA SAYFA</button>
-            
+            <!-- Oyuncu kontrolleri -->
             <div class="control-btn p1-left" id="p1-left">‹</div>
             <div class="control-btn p1-right" id="p1-right">›</div>
             <div class="control-btn p1-jump" id="p1-jump">↑</div>
@@ -386,6 +415,9 @@
             <div class="control-btn p2-right" id="p2-right">›</div>
             <div class="control-btn p2-jump" id="p2-jump">↑</div>
             <div class="control-btn p2-kick" id="p2-kick">⚽</div>
+            
+            <!-- Ana menü butonu -->
+            <div class="home-btn" id="home-btn">🏠</div>
         </div>
         
         <div id="start-screen" class="overlay">
@@ -408,8 +440,6 @@
         </div>
 
         <div id="settings-screen" class="overlay">
-            <button class="home-btn" id="settings-home-btn" style="position: absolute; top: 20px; right: 20px;">🏠</button>
-            
             <div class="settings-container">
                 <h1>AYARLAR</h1>
                 
@@ -480,9 +510,35 @@
                     </select>
                 </div>
 
+                <div class="setting-item">
+                    <label>Sol Oyuncu Boyutu: <span id="p1-scale-value">100%</span></label>
+                    <input type="range" id="p1-scale" min="0.5" max="2.0" step="0.1" value="1.0">
+                </div>
+
+                <div class="setting-item">
+                    <label>Sağ Oyuncu Boyutu: <span id="p2-scale-value">100%</span></label>
+                    <input type="range" id="p2-scale" min="0.5" max="2.0" step="0.1" value="1.0">
+                </div>
+
+                <div class="setting-item">
+                    <label>Top Boyutu: <span id="ball-scale-value">100%</span></label>
+                    <input type="range" id="ball-scale" min="0.5" max="2.0" step="0.1" value="1.0">
+                </div>
+
+                <div class="setting-item">
+                    <label>Sol Kale Boyutu: <span id="goal1-scale-value">100%</span></label>
+                    <input type="range" id="goal1-scale" min="0.5" max="2.0" step="0.1" value="1.0">
+                </div>
+
+                <div class="setting-item">
+                    <label>Sağ Kale Boyutu: <span id="goal2-scale-value">100%</span></label>
+                    <input type="range" id="goal2-scale" min="0.5" max="2.0" step="0.1" value="1.0">
+                </div>
+
                 <div class="button-container">
                     <button id="save-settings-btn">KAYDET</button>
                     <button id="back-to-menu-btn">GERİ DÖN</button>
+                    <button id="home-from-settings-btn">ANA MENÜ</button>
                 </div>
             </div>
         </div>
@@ -571,16 +627,30 @@
             backgroundImageData: null,
             ballImageData: null,
             goal1ImageData: null,
-            goal2ImageData: null
+            goal2ImageData: null,
+            player1Scale: 1.0,
+            player2Scale: 1.0,
+            ballScale: 1.0,
+            goal1Scale: 1.0,
+            goal2Scale: 1.0
         };
 
-        // Oyun nesneleri
+        // Oyun nesneleri (boyutlar dinamik olarak ayarlanacak)
         const groundY = canvas.height - 40;
+
+        // Temel boyutlar
+        const baseSizes = {
+            player: { w: 160, h: 50, headRadius: 35 },
+            ball: { r: 25 },
+            goal: { w: 100, h: 100 }
+        };
 
         const player1 = {
             x: canvas.width * 0.25,
             y: groundY,
-            w: 80, h: 60, headRadius: 35,
+            w: baseSizes.player.w, 
+            h: baseSizes.player.h, 
+            headRadius: baseSizes.player.headRadius,
             dx: 0, dy: 0,
             onGround: true,
             score: 0,
@@ -596,7 +666,9 @@
         const player2 = {
             x: canvas.width * 0.75,
             y: groundY,
-            w: 80, h: 60, headRadius: 35,
+            w: baseSizes.player.w, 
+            h: baseSizes.player.h, 
+            headRadius: baseSizes.player.headRadius,
             dx: 0, dy: 0,
             onGround: true,
             score: 0,
@@ -613,12 +685,23 @@
         const ball = {
             x: canvas.width / 2,
             y: canvas.height / 2,
-            r: 25,
+            r: baseSizes.ball.r,
             dx: 0, dy: 0
         };
 
-        const goal1 = { x: 0, y: groundY - 100, w: 100, h: 100 };
-        const goal2 = { x: canvas.width - 100, y: groundY - 100, w: 100, h: 100 };
+        const goal1 = { 
+            x: 0, 
+            y: groundY - baseSizes.goal.h, 
+            w: baseSizes.goal.w, 
+            h: baseSizes.goal.h 
+        };
+        
+        const goal2 = { 
+            x: canvas.width - baseSizes.goal.w, 
+            y: groundY - baseSizes.goal.h, 
+            w: baseSizes.goal.w, 
+            h: baseSizes.goal.h 
+        };
 
         // Kontrol sistemi
         const keys = {};
@@ -633,7 +716,32 @@
             e.preventDefault();
         });
 
-        // Varsayılan görselleri yükleme
+        // Boyut ayarlarını uygula
+        function applyScaleSettings() {
+            // Oyuncu 1 boyutları
+            player1.w = baseSizes.player.w * savedSettings.player1Scale;
+            player1.h = baseSizes.player.h * savedSettings.player1Scale;
+            player1.headRadius = baseSizes.player.headRadius * savedSettings.player1Scale;
+            
+            // Oyuncu 2 boyutları
+            player2.w = baseSizes.player.w * savedSettings.player2Scale;
+            player2.h = baseSizes.player.h * savedSettings.player2Scale;
+            player2.headRadius = baseSizes.player.headRadius * savedSettings.player2Scale;
+            
+            // Top boyutu
+            ball.r = baseSizes.ball.r * savedSettings.ballScale;
+            
+            // Sol kale boyutu
+            goal1.w = baseSizes.goal.w * savedSettings.goal1Scale;
+            goal1.h = baseSizes.goal.h * savedSettings.goal1Scale;
+            goal1.y = groundY - goal1.h;
+            
+            // Sağ kale boyutu
+            goal2.w = baseSizes.goal.w * savedSettings.goal2Scale;
+            goal2.h = baseSizes.goal.h * savedSettings.goal2Scale;
+            goal2.x = canvas.width - goal2.w;
+            goal2.y = groundY - goal2.h;
+        }
         function loadDefaultImages() {
             if (defaultImages.player1) {
                 const img = new Image();
@@ -757,6 +865,16 @@
             addControlEvents('p2-right', player2.keys.right);
             addControlEvents('p2-jump', player2.keys.up);
             addControlEvents('p2-kick', player2.keys.kick);
+            
+            // Ana menü butonu için özel olay dinleyicisi
+            const homeBtn = document.getElementById('home-btn');
+            if (homeBtn) {
+                homeBtn.addEventListener('click', () => {
+                    if (confirm('Ana menüye dönmek istediğinizden emin misiniz? Oyun sıfırlanacak.')) {
+                        showMainMenu();
+                    }
+                });
+            }
         }
 
         // Çizim fonksiyonları
@@ -837,25 +955,25 @@
                 ctx.shadowBlur = 0;
                 
                 ctx.beginPath();
-                ctx.arc(p.x - 12, p.y - p.h - 7, 6, 0, Math.PI * 2);
+                ctx.arc(p.x - 12, p.y - p.h - 5, 6, 0, Math.PI * 2);
                 ctx.fillStyle = 'white';
                 ctx.fill();
                 ctx.beginPath();
-                ctx.arc(p.x - 12 + eyeDirection * 3, p.y - p.h - 7, 3, 0, Math.PI * 2);
+                ctx.arc(p.x - 12 + eyeDirection * 3, p.y - p.h - 5, 3, 0, Math.PI * 2);
                 ctx.fillStyle = 'black';
                 ctx.fill();
 
                 ctx.beginPath();
-                ctx.arc(p.x + 12, p.y - p.h - 7, 6, 0, Math.PI * 2);
+                ctx.arc(p.x + 12, p.y - p.h - 5, 6, 0, Math.PI * 2);
                 ctx.fillStyle = 'white';
                 ctx.fill();
                 ctx.beginPath();
-                ctx.arc(p.x + 12 + eyeDirection * 3, p.y - p.h - 7, 3, 0, Math.PI * 2);
+                ctx.arc(p.x + 12 + eyeDirection * 3, p.y - p.h - 5, 3, 0, Math.PI * 2);
                 ctx.fillStyle = 'black';
                 ctx.fill();
 
                 ctx.beginPath();
-                ctx.arc(p.x, p.y - p.h + 14, 7, 0, Math.PI);
+                ctx.arc(p.x, p.y - p.h + 15, 8, 0, Math.PI);
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 2;
                 ctx.stroke();
@@ -1157,6 +1275,7 @@
             settingsScreen.style.display = 'none';
             gameControls.style.display = 'none';
             if (timerInterval) clearInterval(timerInterval);
+            if (goalMessageTimeout) clearTimeout(goalMessageTimeout);
         }
 
         function showSettings() {
@@ -1171,6 +1290,13 @@
             
             savedSettings.matchDuration = parseInt(matchDuration);
             savedSettings.difficulty = difficulty;
+            
+            // Boyut ayarları
+            savedSettings.player1Scale = parseFloat(document.getElementById('p1-scale').value);
+            savedSettings.player2Scale = parseFloat(document.getElementById('p2-scale').value);
+            savedSettings.ballScale = parseFloat(document.getElementById('ball-scale').value);
+            savedSettings.goal1Scale = parseFloat(document.getElementById('goal1-scale').value);
+            savedSettings.goal2Scale = parseFloat(document.getElementById('goal2-scale').value);
             
             settings.MATCH_DURATION = parseInt(matchDuration);
             settings.DIFFICULTY = difficulty;
@@ -1189,11 +1315,28 @@
                     settings.AI_REACTION_TIME = 5;
                     break;
             }
+            
+            // Boyut ayarlarını uygula
+            applyScaleSettings();
         }
 
         function loadSavedSettings() {
             document.getElementById('match-duration').value = savedSettings.matchDuration;
             document.getElementById('difficulty').value = savedSettings.difficulty;
+            
+            // Boyut slider'ları
+            document.getElementById('p1-scale').value = savedSettings.player1Scale;
+            document.getElementById('p2-scale').value = savedSettings.player2Scale;
+            document.getElementById('ball-scale').value = savedSettings.ballScale;
+            document.getElementById('goal1-scale').value = savedSettings.goal1Scale;
+            document.getElementById('goal2-scale').value = savedSettings.goal2Scale;
+            
+            // Değer görüntüleri güncelle
+            document.getElementById('p1-scale-value').textContent = Math.round(savedSettings.player1Scale * 100) + '%';
+            document.getElementById('p2-scale-value').textContent = Math.round(savedSettings.player2Scale * 100) + '%';
+            document.getElementById('ball-scale-value').textContent = Math.round(savedSettings.ballScale * 100) + '%';
+            document.getElementById('goal1-scale-value').textContent = Math.round(savedSettings.goal1Scale * 100) + '%';
+            document.getElementById('goal2-scale-value').textContent = Math.round(savedSettings.goal2Scale * 100) + '%';
             
             settings.MATCH_DURATION = savedSettings.matchDuration;
             settings.DIFFICULTY = savedSettings.difficulty;
@@ -1212,6 +1355,9 @@
                     settings.AI_REACTION_TIME = 5;
                     break;
             }
+            
+            // Boyut ayarlarını uygula
+            applyScaleSettings();
             
             if (savedSettings.player1ImageData) {
                 const img = new Image();
@@ -1282,6 +1428,9 @@
             player2.score = 0;
             timer = settings.MATCH_DURATION;
             goalScored = false; // Reset gol bayrağı
+            
+            // Boyut ayarlarını uygula
+            applyScaleSettings();
             resetPositions();
 
             if (timerInterval) clearInterval(timerInterval);
@@ -1384,14 +1533,7 @@
                 showMainMenu();
             });
 
-            // Ana sayfa butonları
-            document.getElementById('game-home-btn').addEventListener('click', () => {
-                if (confirm('Oyunu bırakıp ana sayfaya dönmek istiyor musunuz?')) {
-                    showMainMenu();
-                }
-            });
-
-            document.getElementById('settings-home-btn').addEventListener('click', () => {
+            document.getElementById('home-from-settings-btn').addEventListener('click', () => {
                 showMainMenu();
             });
 
@@ -1410,6 +1552,32 @@
                     };
                     reader.readAsDataURL(e.target.files[0]);
                 }
+            });
+
+            // Boyut slider'ları için event listener'lar
+            document.getElementById('p1-scale').addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                document.getElementById('p1-scale-value').textContent = Math.round(value * 100) + '%';
+            });
+
+            document.getElementById('p2-scale').addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                document.getElementById('p2-scale-value').textContent = Math.round(value * 100) + '%';
+            });
+
+            document.getElementById('ball-scale').addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                document.getElementById('ball-scale-value').textContent = Math.round(value * 100) + '%';
+            });
+
+            document.getElementById('goal1-scale').addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                document.getElementById('goal1-scale-value').textContent = Math.round(value * 100) + '%';
+            });
+
+            document.getElementById('goal2-scale').addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                document.getElementById('goal2-scale-value').textContent = Math.round(value * 100) + '%';
             });
 
             document.getElementById('p2-char-input').addEventListener('change', (e) => {
@@ -1607,7 +1775,7 @@
             setupGameControls();
             setupEventListeners();
             loadDefaultImages();
-            loadSavedSettings();
+            loadSavedSettings(); // Bu boyut ayarlarını da uygular
             showMainMenu();
             gameLoop();
         }
